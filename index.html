@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OLO Keystrokes Serial Companion</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module" src="https://unpkg.com/esp-web-tools@9.4.2/dist/web/install-button.js?module"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0b0b0e;
+      --card-bg: #121218;
+      --border-color: #212130;
+      --text: #f0f0f5;
+      --text-muted: #8e9297;
+      --accent: #fd7e14;
+      --accent-hover: #ff9233;
+      --success: #198754;
+      --success-hover: #1f9d62;
+      --danger: #dc3545;
+      --danger-hover: #e3515e;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+      padding: 15px;
+      min-height: 100vh;
+      font-size: 0.9rem;
+    }
+
+    header {
+      max-width: 1100px;
+      margin: 0 auto 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 15px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 800px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+      color: #fff;
+    }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    select {
+      background-color: #1a1a24;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      border-radius: 5px;
+      padding: 8px 10px;
+      width: 100%;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      outline: none;
+      background-color: #20202d;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 12px;
+      border-radius: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: background-color 0.15s;
+      gap: 5px;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: #000;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background-color: #2b2b36;
+      color: var(--text);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #3e3e4f;
+    }
+
+    .btn-success {
+      background-color: var(--success);
+      color: #fff;
+    }
+    .btn-success:hover:not(:disabled) {
+      background-color: var(--success-hover);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: #fff;
+    }
+    .btn-danger:hover:not(:disabled) {
+      background-color: var(--danger-hover);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .w-100 { width: 100%; }
+    .w-50 { width: 50%; }
+    .flex-grow-1 { flex-grow: 1; }
+    .text-center { text-align: center; }
+    .text-muted { color: var(--text-muted); font-size: 0.8rem; }
+    .text-info { color: #54a0ff; }
+    .text-danger { color: var(--danger); }
+    .mt-3 { margin-top: 10px; }
+    .mb-4 { margin-bottom: 15px; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background-color: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+      border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+    .status-badge.connected {
+      background-color: rgba(25, 135, 84, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--danger);
+      margin-right: 5px;
+    }
+
+    .status-badge.connected .status-dot {
+      background-color: var(--success);
+    }
+
+    .log-console {
+      height: 90px;
+      max-height: 90px;
+      background-color: #08080a;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #b0b0b8;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    footer {
+      max-width: 1100px;
+      margin: 20px auto 0;
+      padding: 15px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+
+<body class="is-disconnected">
+
+  <header>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 1.4rem;">⌨️</span>
+      <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.5px;">OLO Keystrokes Serial Companion</h2>
+    </div>
+    <div>
+      <span class="status-badge" id="statusBadgeHeader">
+        <span class="status-dot"></span>
+        <span id="statusTextHeader">Disconnected</span>
+      </span>
+    </div>
+  </header>
+
+  <div class="dashboard-grid">
+    <!-- LEFT COLUMN: Firmware Flashing -->
+    <div class="panel text-center" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 15px;">
+      <div style="font-size: 2.8rem; margin-bottom: 15px;">💾</div>
+      <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem;">Firmware Flashing</h3>
+      <p class="text-muted mb-4" style="font-size: 0.85rem; max-width: 380px; margin: 0 auto 20px;">
+        Perform a complete system update or recover your device by flashing the official firmware binary onto your OLO Keystrokes hardware directly over USB.
+      </p>
+      <esp-web-install-button manifest="./manifest.json">
+        <button slot="activate" class="btn btn-primary" style="padding: 10px 25px;">⚡ Flash Firmware</button>
+      </esp-web-install-button>
+      <small class="text-muted mt-3" style="font-size: 0.7rem;">
+        * Requires Google Chrome, Microsoft Edge, or Opera browser.
+      </small>
+    </div>
+
+    <!-- RIGHT COLUMN: Web Serial Connection & Setup Form -->
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+      <div class="panel" id="serial-settings-panel" style="min-height: 380px;">
+        
+        <!-- Disconnected State -->
+        <div id="serial-connect-view" class="text-center" style="padding: 50px 10px;">
+          <div style="font-size: 2.8rem; margin-bottom: 15px;">🔌</div>
+          <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem;">Web Serial Setup</h3>
+          <p class="text-muted mb-4" style="font-size: 0.85rem; max-width: 380px; margin: 0 auto 20px;">Connect your OLO Keystrokes hardware via USB Serial to set up WiFi credentials, modify configurations, and perform diagnostics.</p>
+          
+          <!-- Web Serial Blocked Warning -->
+          <div id="serial-browser-warning" style="display: none; text-align: left; color: #ff4757; background: rgba(220, 53, 69, 0.1); border: 1px solid rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 5px; margin: 0 auto 15px; max-width: 460px; font-size: 0.8rem;">
+            <strong>⚠️ Web Serial API Blocked or Unsupported:</strong><br>
+            Browsers disable Serial access on <code>file:///</code> URLs. Please serve this page from a local server (e.g. <strong>http://localhost:8080</strong>) to enable serial functionality.
+          </div>
+
+          <button class="btn btn-primary" id="connectBtnSerial" style="padding: 10px 25px;">🔌 Connect Web Serial</button>
+        </div>
+
+        <!-- Connected State (Form) -->
+        <div id="serial-form-view" style="display: none;">
+          <h3 class="panel-title">⚙️ WiFi & Admin Setup</h3>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+            <div>
+              <label for="serialWifiSsid">WiFi SSID</label>
+              <input type="text" id="serialWifiSsid" placeholder="WiFi Network Name">
+              
+              <label for="serialWifiPassword">WiFi Password</label>
+              <input type="password" id="serialWifiPassword" placeholder="WiFi Password">
+              
+              <label for="serialWebPassword">Web Login Password</label>
+              <input type="password" id="serialWebPassword" placeholder="Web Portal Password">
+              
+              <label for="serialCustomPayload">Offline Keystroke Payload</label>
+              <input type="text" id="serialCustomPayload" placeholder="e.g. cmd:calc">
+            </div>
+
+            <div>
+              <label for="serialBootText">Boot Welcome Greeting</label>
+              <input type="text" id="serialBootText" placeholder="OLO Keystrokes">
+              
+              <label for="serialBtName">BLE Advertising Name</label>
+              <input type="text" id="serialBtName" placeholder="OLO-Keystrokes">
+              
+              <label for="serialBleEnabled">Bluetooth State</label>
+              <select id="serialBleEnabled">
+                <option value="1">Bluetooth ON (Advertising)</option>
+                <option value="0">Bluetooth OFF (Radio Disabled)</option>
+              </select>
+              
+              <label for="serialTimezoneSelect">Timezone Region</label>
+              <select id="serialTimezoneSelect">
+                <option value="EST5EDT,M3.2.0,M11.1.0">Eastern Time (US & Canada)</option>
+                <option value="CST6CDT,M3.2.0,M11.1.0">Central Time (US & Canada)</option>
+                <option value="MST7MDT,M3.2.0,M11.1.0">Mountain Time (US & Canada)</option>
+                <option value="PST8PDT,M3.2.0,M11.1.0">Pacific Time (US & Canada)</option>
+                <option value="GMT0BST,M3.5.0/2,M10.5.0/2">London / GMT</option>
+                <option value="CET-1CEST,M3.5.0,M10.5.0/3">Central European Time</option>
+                <option value="EET-2EEST,M3.5.0/3,M10.5.0/4">Eastern European Time</option>
+                <option value="IST-5:30">Indian Standard Time (New Delhi)</option>
+                <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Sydney / Melbourne</option>
+                <option value="custom">Custom Timezone POSIX String</option>
+              </select>
+              <div id="serialTimezoneCustomGroup" style="display: none;">
+                <label for="serialTimezoneCustom">POSIX Timezone Definition</label>
+                <input type="text" id="serialTimezoneCustom" value="UTC0">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 5px;">
+            <div>
+              <label for="serialTimeFormat">Clock Time Format</label>
+              <select id="serialTimeFormat">
+                <option value="0">24-Hour Format</option>
+                <option value="1">12-Hour Format (AM/PM)</option>
+              </select>
+            </div>
+            <div>
+              <label for="serialHourlyChime">Hourly Chime Beep</label>
+              <select id="serialHourlyChime">
+                <option value="0">Disabled (Quiet)</option>
+                <option value="1">Enabled (Beep Hourly)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+            <div>
+              <label for="serialScreenType">Display Type</label>
+              <select id="serialScreenType">
+                <option value="0">SSD1306 (128x64)</option>
+                <option value="1">SH1106 (128x64)</option>
+              </select>
+            </div>
+            <div>
+              <label for="serialSdaPin">I2C SDA Pin</label>
+              <input type="number" id="serialSdaPin" placeholder="e.g. 20" min="0" max="48">
+            </div>
+            <div>
+              <label for="serialSclPin">I2C SCL Pin</label>
+              <input type="number" id="serialSclPin" placeholder="e.g. 21" min="0" max="48">
+            </div>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+            <button class="btn btn-secondary flex-grow-1" id="serialReadConfigBtn">🔄 Read Config</button>
+            <button class="btn btn-primary flex-grow-1" id="serialSaveConfigBtn">💾 Save Settings</button>
+            <button class="btn btn-danger flex-grow-1" id="serialResetDefaultsBtn">🗑️ Reset Defaults</button>
+          </div>
+          
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+            <button class="btn btn-danger flex-grow-1" id="serialRebootBtn">🔄 Reboot Device</button>
+            <button class="btn btn-secondary flex-grow-1" id="disconnectBtnSerialSidebar">🔌 Disconnect</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live System Monitor Console (Compact 90px Height) -->
+      <div class="panel d-flex flex-column mb-0" style="padding: 10px 12px;">
+        <label style="font-size: 0.7rem; margin-bottom: 4px;">💻 Live Monitor</label>
+        <div class="log-console" id="serial-terminal">
+          <div class="text-info">[System] Ready. Connect via Web Serial to view device logs.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 OLO Keystrokes. Open-Source Security Audit Project.</p>
+  </footer>
+
+  <script>
+    let port;
+    let reader;
+    let writer;
+    let keepReading = true;
+    let closedPromise;
+
+    // DOM Elements
+    const connectBtnSerial = document.getElementById('connectBtnSerial');
+    const disconnectBtnSerialSidebar = document.getElementById('disconnectBtnSerialSidebar');
+    const rebootBtn = document.getElementById('serialRebootBtn');
+    const readConfigBtn = document.getElementById('serialReadConfigBtn');
+    const saveConfigBtn = document.getElementById('serialSaveConfigBtn');
+    const resetDefaultsBtn = document.getElementById('serialResetDefaultsBtn');
+
+    const bootText = document.getElementById('serialBootText');
+    const btName = document.getElementById('serialBtName');
+    const bleEnabled = document.getElementById('serialBleEnabled');
+    const webPassword = document.getElementById('serialWebPassword');
+    const timeFormatSelect = document.getElementById('serialTimeFormat');
+    const hourlyChimeSelect = document.getElementById('serialHourlyChime');
+    const customInput = document.getElementById('serialCustomPayload');
+    
+    const wifiSsid = document.getElementById('serialWifiSsid');
+    const wifiPassword = document.getElementById('serialWifiPassword');
+    const timezoneSelect = document.getElementById('serialTimezoneSelect');
+    const timezoneCustom = document.getElementById('serialTimezoneCustom');
+    const timezoneCustomGroup = document.getElementById('serialTimezoneCustomGroup');
+    
+    const screenType = document.getElementById('serialScreenType');
+    const sdaPin = document.getElementById('serialSdaPin');
+    const sclPin = document.getElementById('serialSclPin');
+    
+    const terminal = document.getElementById('serial-terminal');
+
+    // Timezone listener
+    if (timezoneSelect) {
+      timezoneSelect.addEventListener('change', () => {
+        if (timezoneSelect.value === 'custom') {
+          if (timezoneCustomGroup) timezoneCustomGroup.style.display = 'block';
+        } else {
+          if (timezoneCustomGroup) timezoneCustomGroup.style.display = 'none';
+          if (timezoneCustom) timezoneCustom.value = timezoneSelect.value;
+        }
+      });
+    }
+
+    // Check for Web Serial API availability in browser
+    if (!navigator.serial) {
+        const warningEl = document.getElementById('serial-browser-warning');
+        if (warningEl) warningEl.style.display = 'block';
+    }
+
+    function appendLog(text, type = 'info') {
+        if (!terminal) return;
+        const line = document.createElement('div');
+        if (type === 'info') line.style.color = '#00ffaa';
+        else if (type === 'error') line.style.color = '#ff4757';
+        else if (type === 'out') line.style.color = '#ff793f';
+        else line.style.color = '#a4b0be';
+        
+        const now = new Date().toLocaleTimeString();
+        line.textContent = `[${now}] ${text}`;
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function setControlsState(enabled) {
+        const elements = [
+            rebootBtn, readConfigBtn, saveConfigBtn, resetDefaultsBtn,
+            bootText, btName, bleEnabled, webPassword, timeFormatSelect, hourlyChimeSelect, customInput,
+            wifiSsid, wifiPassword, timezoneSelect, timezoneCustom,
+            screenType, sdaPin, sclPin
+        ];
+        elements.forEach(el => {
+            if (el) {
+                if (enabled) el.removeAttribute('disabled');
+                else el.setAttribute('disabled', 'true');
+            }
+        });
+
+        const statusBadgeHeader = document.getElementById('statusBadgeHeader');
+        const statusTextHeader = document.getElementById('statusTextHeader');
+
+        if (enabled) {
+            document.body.classList.add('is-connected');
+            document.body.classList.remove('is-disconnected');
+            if (statusBadgeHeader) {
+                statusBadgeHeader.classList.add('connected');
+                statusTextHeader.textContent = 'Connected';
+            }
+            const conView = document.getElementById('serial-connect-view');
+            const formView = document.getElementById('serial-form-view');
+            if (conView) conView.style.display = 'none';
+            if (formView) formView.style.display = 'block';
+        } else {
+            document.body.classList.remove('is-connected');
+            document.body.classList.add('is-disconnected');
+            if (statusBadgeHeader) {
+                statusBadgeHeader.classList.remove('connected');
+                statusTextHeader.textContent = 'Disconnected';
+            }
+            const conView = document.getElementById('serial-connect-view');
+            const formView = document.getElementById('serial-form-view');
+            if (conView) conView.style.display = 'block';
+            if (formView) formView.style.display = 'none';
+        }
+    }
+
+    async function writeLine(text) {
+        if (!writer) return;
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text + '\r\n');
+        await writer.write(data);
+        appendLog(`Sent: ${text}`, 'out');
+    }
+
+    async function readLoop() {
+        const decoder = new TextDecoder();
+        let buffer = '';
+        try {
+            while (port && port.readable && keepReading) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                if (value) {
+                    buffer += decoder.decode(value);
+                    let lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    for (let line of lines) {
+                        line = line.trim();
+                        if (line.length > 0) {
+                            appendLog(`Recv: ${line}`, 'in');
+                            parseLine(line);
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            appendLog(`Read error: ${err.message}`, 'error');
+        } finally {
+            if (reader) reader.releaseLock();
+        }
+    }
+
+    function parseLine(line) {
+        if (line.startsWith("CONFIG:")) {
+            const data = line.substring(7);
+            const params = new URLSearchParams(data.replace(/;/g, '&'));
+            
+            if (params.has('boot_txt') && bootText) bootText.value = params.get('boot_txt');
+            if (params.has('bt_name') && btName) btName.value = params.get('bt_name');
+            if (params.has('ble_en') && bleEnabled) bleEnabled.value = params.get('ble_en');
+            if (params.has('wifi_ssid') && wifiSsid) wifiSsid.value = params.get('wifi_ssid');
+            if (params.has('wifi_pass') && wifiPassword) wifiPassword.value = params.get('wifi_pass');
+            if (params.has('web_pass') && webPassword) webPassword.value = params.get('web_pass');
+            if (params.has('time_fmt') && timeFormatSelect) timeFormatSelect.value = params.get('time_fmt');
+            if (params.has('chime_en') && hourlyChimeSelect) hourlyChimeSelect.value = params.get('chime_en');
+            if (params.has('payload') && customInput) customInput.value = params.get('payload');
+            if (params.has('screen') && screenType) screenType.value = params.get('screen');
+            if (params.has('sda') && sdaPin) sdaPin.value = params.get('sda');
+            if (params.has('scl') && sclPin) sclPin.value = params.get('scl');
+            if (params.has('timezone') && timezoneSelect) {
+                const tzVal = params.get('timezone');
+                if (timezoneCustom) timezoneCustom.value = tzVal;
+                let found = false;
+                for (let option of timezoneSelect.options) {
+                    if (option.value === tzVal) {
+                        timezoneSelect.value = tzVal;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    timezoneSelect.value = 'custom';
+                    if (timezoneCustomGroup) timezoneCustomGroup.style.display = 'block';
+                } else {
+                    if (timezoneCustomGroup) timezoneCustomGroup.style.display = 'none';
+                }
+            }
+
+            appendLog("Configurations loaded successfully.", "info");
+        }
+    }
+
+    async function disconnect() {
+        keepReading = false;
+        if (reader) {
+            await reader.cancel();
+            await closedPromise;
+        }
+        if (writer) {
+            writer.releaseLock();
+            writer = null;
+        }
+        if (port) {
+            await port.close();
+            port = null;
+        }
+        setControlsState(false);
+        appendLog("Device disconnected.", "info");
+    }
+
+    async function handleConnect() {
+        if (!navigator.serial) {
+            alert("Web Serial API is blocked or unsupported in this context.\n\nPlease open this page from a secure or local origin (e.g. http://localhost:8080) to enable Web Serial.");
+            return;
+        }
+        try {
+            port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 115200 });
+            
+            writer = port.writable.getWriter();
+            reader = port.readable.getReader();
+            
+            keepReading = true;
+            closedPromise = readLoop();
+            
+            setControlsState(true);
+            appendLog("Device connected via USB Serial successfully.", "info");
+
+            setTimeout(async () => {
+                await writeLine("GET_CONFIG");
+            }, 800);
+
+        } catch (err) {
+            appendLog(`USB Connection failed: ${err.message}`, 'error');
+            setControlsState(false);
+        }
+    }
+
+    if (connectBtnSerial) connectBtnSerial.addEventListener('click', handleConnect);
+    if (disconnectBtnSerialSidebar) {
+        disconnectBtnSerialSidebar.addEventListener('click', async () => {
+            if (port) await disconnect();
+            else await handleConnect();
+        });
+    }
+
+    const flashBtn = document.querySelector('esp-web-install-button button');
+    if (flashBtn) {
+        flashBtn.addEventListener('click', async () => {
+            if (port) {
+                appendLog("Disconnecting Serial to allow firmware flasher...", "info");
+                await disconnect();
+            }
+        });
+    }
+
+    if (saveConfigBtn) {
+        saveConfigBtn.addEventListener('click', async () => {
+            await writeLine(`SET_BOOT_TXT:${bootText.value}`);
+            await writeLine(`SET_BT_NAME:${btName.value}`);
+            await writeLine(`SET_BLE:${bleEnabled.value}`);
+            await writeLine(`SET_WEB_PASS:${webPassword.value}`);
+            await writeLine(`SET_TIME_FMT:${timeFormatSelect.value}`);
+            await writeLine(`SET_CHIME:${hourlyChimeSelect.value}`);
+            await writeLine(`SET_PAYLOAD:${customInput.value}`);
+            if (screenType) await writeLine(`SET_SCREEN:${screenType.value}`);
+            if (sdaPin && sclPin) await writeLine(`SET_PINS:${sdaPin.value},${sclPin.value}`);
+            
+            const tz = timezoneCustom.value || "UTC0";
+            await writeLine(`SET_WIFI:${wifiSsid.value},${wifiPassword.value},${tz}`);
+            await writeLine("SAVE_CONF");
+        });
+    }
+
+    if (rebootBtn) {
+        rebootBtn.addEventListener('click', async () => {
+            if (confirm("Are you sure you want to reboot the device?")) {
+                await writeLine("REBOOT");
+                disconnect();
+            }
+        });
+    }
+
+    if (resetDefaultsBtn) {
+        resetDefaultsBtn.addEventListener('click', async () => {
+            if (confirm("Are you sure you want to reset device parameters?")) {
+                await writeLine("RESET_CONF");
+                disconnect();
+            }
+        });
+    }
+
+    if (readConfigBtn) {
+        readConfigBtn.addEventListener('click', async () => {
+            await writeLine("GET_CONFIG");
+        });
+    }
+
+    // Set initial setup state
+    setControlsState(false);
+  </script>
+</body>
+</html>

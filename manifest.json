@@ -1,7 +1,6 @@
 {
   "name": "OLO Keystrokes",
   "version": "1.0.0",
-  "home_page": "https://github.com/T-vK/ESP32-BLE-Keyboard",
   "new_install_prompt-en": "This will install OLO Keystrokes firmware on your ESP32-C3 Super Mini. Any existing data will be overwritten.",
   "builds": [
     {

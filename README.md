@@ -1,62 +1,72 @@
-# 🎨 OLO Keystroke Injector
+# OLO Keystroke Injector: BLE & WiFi Robot Companion
 
-🚀 **An Offline-First HID Payload Companion & IoT Device Powered by ESP32-C3 SuperMini**
+A smart, interactive, and customizable keystroke injector built for the **ESP32-C3 Super Mini** micro-controller. This device emulates a standard Bluetooth Low Energy (BLE) Keyboard using the **ESP32-BLE-Keyboard** library wrapped in the lightweight **NimBLE** stack, and hosts an on-chip Web Control Center served over local Wi-Fi.
 
-[![Launch Controller](https://img.shields.io/badge/OLO_Dashboard-Launch_Live_Web_App-FF6600?style=for-the-badge&logo=googlechrome&logoColor=white)](https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/)
-[![Hardware](https://img.shields.io/badge/Hardware-ESP32--C3_SuperMini-blue?style=for-the-badge)](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-
-OLO Keystroke Injector is a pocket-sized, offline-focused hardware automation tool and desktop companion. It leverages the native Bluetooth Low Energy (BLE) HID capabilities of the **ESP32-C3** to act as a wireless programmable keyboard companion. 
-
-Featuring an intuitive on-device UI via an OLED screen and a capacitive touch sensor, it allows you to fire custom macros, system shortcuts, presenter slide commands, or pen-testing payloads instantly. It syncs fully offline using a browser-based **Web Serial (USB)** controller dashboard or hosts its own wireless local dashboard.
+The device is disguised as a small robot-like character displaying animations on a dynamic OLED screen. It supports dual radio capabilities (BLE and Wi-Fi), which can be managed independently to enable completely offline modes.
 
 ---
 
-## ✨ Key Features
+## 🛠️ Pin Configuration & Hardware Connection
 
-*   **🎮 Snappy One-Button UI:** Entirely managed through a single debounced touch sensor supporting Single-Tap, Double-Tap, and Long-Press controls.
-*   **🔌 Web Serial Sync:** Program payloads instantly via a browser-based GUI over USB—no developer environments or flashing software required.
-*   **🌐 Wireless Local Hub:** Hosts its own standalone HTTP dashboard straight from memory (`PROGMEM`) at `http://olokeys.local/` when Wi-Fi is active.
-*   **🛌 OLED Screen Protection:** Dual-stage safety exhaustion timer system (Drifting Eye Screensaver $\rightarrow$ Deep Sleep State) to prevent display burn-in.
-*   **🔊 Audio-Visual Feedback:** Fully integrated NeoPixel RGB status indicators synced with multi-frequency buzzer tone notifications.
-*   **🔒 Secured Isolation:** Dynamic text pushes flow instantly straight to volatile RAM to protect persistent flash cycles, backed by a dashboard security administration gate.
+The default wiring assignments are as follows. These pins can be customized dynamically using the **Web Serial Controller** interface (`index.html`) without recompiling.
 
----
-
-## 🔌 Hardware Connections & Pinout
-
-Wire your components to the **ESP32-C3 SuperMini** following this physical routing layout:
-
-| Component | Pin Name | ESP32-C3 GPIO | Power / Ground Rail | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **OLED Display** | SDA | `GPIO 20` | `3.3V` / `GND` | I2C Data Line (Fixed) |
-| **OLED Display** | SCL | `GPIO 21` | `3.3V` / `GND` | I2C Clock Line (Fixed) |
-| **Touch Sensor** | I/O | `GPIO 1` | `3.3V` or `5V` / `GND` | TTP223 Input Channel |
-| **Buzzer** | Signal | `GPIO 2` | `GND` | PWM Frequency Audio Out |
-| **NeoPixel LED** | DIN | `GPIO 6` | `5V` / `GND` | WS2812B RGB Control Line |
-
-> [!WARNING]
-> Double-check your hardware lines before applying power. Swapping `SCL/SDA` or selecting incorrect pin definitions will prevent the OLED system from initializing properly.
+| Component | Pin | Description |
+|---|---|---|
+| **BUTTON_PIN** | `GPIO 1` | TTP223 Capacitive Touch Sensor (Active HIGH) |
+| **BUZZER_PIN** | `GPIO 2` | Passive Buzzer for acoustic and menu feedback |
+| **LED_PIN** | `GPIO 6` | WS2812B Single NeoPixel (RGB State indicator) |
+| **I2C_SDA** | `GPIO 20` | Dynamic I2C Data line for SSD1306 / SH1106 |
+| **I2C_SCL** | `GPIO 21` | Dynamic I2C Clock line for SSD1306 / SH1106 |
 
 ---
 
-## 📂 System Menu Hierarchy
+## 🎯 Enhanced Features
 
-The physical display navigation maps across five structural device layers:
+1. **U8g2 Graphics Engine**: Built using `olikraus/U8g2` display bindings, replacing basic Adafruit drivers with high-fidelity monospace/serif typography fonts and native hardware I2C rendering.
+2. **Dynamic Clock & Status Faces**:
+   - **Digital Face**: Large hour/minute/second counters displaying active timezone calendars.
+   - **Analog Face**: Visual watch dial calculating hour, minute, and second vector ticks dynamically.
+   - **Bluetooth Status Face**: Shows active pairing state and connection info. Double-tap to toggle Bluetooth.
+   - **WiFi Status Face**: New 4th face showing SSID and connection info. Double-tap to toggle WiFi radio dynamically (defaults ON at boot, does not write state to NVS to prevent wear).
+3. **Dual-Stage Inactivity Timers**:
+   - **Screensaver Delay**: Activates after idle time (default `30s`, max `90s`) to display a pair of blinking/drifting eyes (preventing OLED screen burn-in).
+   - **Sleep Delay**: Activates after continued idle time (default `120s`, min `120s`) transitioning to a sleeping face animation.
+   - Tap the capacitive touch sensor once to instantly wake up from any idle/screensaver state.
+4. **Instant Touch Feedback**:
+   - Dynamic corner dot rendering when the capacitive touch pin is physically HIGH.
+   - **Quick-Action Submenus**: Single tapping instantly executes highlighted script injections, while double tapping cycles selection down.
+   - **Optimized Latency**: Double-tap detection window reduced to `150ms` for faster single-click response times.
+   - **Short Scroll Beeps**: Buzzer scroll feed tones shortened to `5ms` for a snappier, responsive menu feel.
+5. **Pre-Loaded Pentest Audit Scripts**:
+   - Notepad proof-of-concept typer.
+   - Administrative local user addition.
+   - PowerShell payload execute command sequence.
+   - Windows Defender Firewall disable utility.
+6. **Customizable NeoPixel LED Modes**: 
+   - Static color pickers, breathing glow, rainbow color cycle, normal BLE status signaling, or complete LED shutdown. Includes dynamic brightness scaling in C++ saved directly in NVS.
+7. **Separate Web Interfaces**:
+   - **Local Setup Companion (`index.html`)**: Run locally in the user's browser for flashing firmware over Web Serial and configuring basic display I2C pins. Forces web controller disconnection to ensure smooth flashing.
+   - **Lightweight Hosted Dashboard (`dashboard.html`)**: Hosted directly on the ESP32 chip (accessible via `http://olokeys.local/` on Wi-Fi). Highly optimized and mobile-responsive (main control tabs at the top, compact mobile buttons, larger preset dots, styled color swatches). Contains security login popup on refresh.
 
-```text
-[ Level 0: Animated Idle Face ]
-           │ (Double Tap)
-           ▼
-[ Level 1: Clocks & Status ] (Single Tap cycles: Digital -> Analog -> BLE Status -> WiFi Status)
-           │ (Double Tap on clocks to enter Menu, or on status pages to toggle radio)
-           ▼
-[ Level 2: Keystroke Category Menu ]
-     ├── 1. Music Control ──────► [ Level 3: Submenu (Play, Next, Vol Up, etc.) ]
-     ├── 2. OS Shortcuts  ──────► [ Level 3: Submenu (Lock, Close, Task Manager) ]
-     ├── 3. Presenter Mode ─────► [ Level 3: Submenu (Next/Prev Slide, Blank Screen) ]
-     ├── 4. Custom Payload ─────► [ Level 3: Submenu (Run Payload) ]
-     ├── 5. Pen-Test Payloads ──► [ Level 3: Submenu (Notepad Demo, Add Admin, etc.) ]
-     ├── 6. Settings ──────────► [ Level 3: Submenu (Toggle BLE, Toggle WiFi) ]
-     ├── 7. FIFA 2026 ─────────► [ Level 3: Submenu (Easter Egg Facts) ]
-     └── 8. Exit (Back to Clock)
+---
+
+## 💻 Compilation and Installation Guide
+
+### Prerequisites
+- Install **VS Code** with the **PlatformIO** extension.
+- Connect the ESP32-C3 Super Mini directly to your computer using a USB-C data cable.
+
+### Build & Upload Firmware
+1. Open the folder in VS Code.
+2. PlatformIO will automatically read `platformio.ini` and download the dependencies (`NimBLE-Arduino`, `U8g2`, `Adafruit NeoPixel`).
+3. Press **Build** (`Ctrl+Alt+B` or checkmark icon in the footer).
+4. Press **Upload** (arrow icon in the footer) to flash the binary over USB.
+
+*Alternatively, compile via the PlatformIO Core CLI:*
+```bash
+# Build binary
+pio run
+
+# Upload binary
+pio run --target upload
+```

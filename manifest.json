@@ -1,14 +1,15 @@
 {
   "name": "OLO Keystrokes",
   "version": "1.0.0",
-  "new_install_prompt-en": "This will install OLO Keystrokes firmware on your ESP32-C3 Super Mini. Any existing data will be overwritten.",
+  "home_page": "https://github.com/T-vK/ESP32-BLE-Keyboard",
+  "new_install_prompt-en": "This will install OLO Keystrokes firmware on your ESP32-C3. Any existing data will be overwritten.",
   "builds": [
     {
       "chipFamily": "ESP32-C3",
       "parts": [
-        { "path": "bootloader.bin", "offset": 0 },
-        { "path": "partitions.bin", "offset": 32768 },
-        { "path": "firmware.bin", "offset": 65536 }
+        { "path": "firmware/bootloader.bin", "offset": 0 },
+        { "path": "firmware/partitions.bin", "offset": 32768 },
+        { "path": "firmware/firmware.bin", "offset": 65536 }
       ]
     }
   ]

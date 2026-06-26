@@ -242,19 +242,95 @@
   </header>
 
   <div class="dashboard-grid">
-    <!-- LEFT COLUMN: Firmware Flashing -->
-    <div class="panel text-center" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 15px;">
-      <div style="font-size: 2.8rem; margin-bottom: 15px;">💾</div>
-      <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem;">Firmware Flashing</h3>
-      <p class="text-muted mb-4" style="font-size: 0.85rem; max-width: 380px; margin: 0 auto 20px;">
-        Perform a complete system update or recover your device by flashing the official firmware binary onto your OLO Keystrokes hardware directly over USB.
-      </p>
-      <esp-web-install-button manifest="./manifest.json">
-        <button slot="activate" class="btn btn-primary" style="padding: 10px 25px;">⚡ Flash Firmware</button>
-      </esp-web-install-button>
-      <small class="text-muted mt-3" style="font-size: 0.7rem;">
-        * Requires Google Chrome, Microsoft Edge, or Opera browser.
-      </small>
+    <!-- LEFT COLUMN: Firmware Flashing & Diagnostics -->
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+      <div class="panel text-center" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 15px;">
+        <div style="font-size: 2.8rem; margin-bottom: 15px;">💾</div>
+        <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem;">Firmware Flashing</h3>
+        <p class="text-muted mb-4" style="font-size: 0.85rem; max-width: 380px; margin: 0 auto 20px;">
+          Perform a complete system update or recover your device by flashing the official firmware binary onto your OLO Keystrokes hardware directly over USB.
+        </p>
+        <esp-web-install-button manifest="./manifest.json">
+          <button slot="activate" class="btn btn-primary" style="padding: 10px 25px;">⚡ Flash Firmware</button>
+        </esp-web-install-button>
+        <small class="text-muted mt-3" style="font-size: 0.7rem;">
+          * Requires Google Chrome, Microsoft Edge, or Opera browser.
+        </small>
+      </div>
+
+      <!-- Live Keystroke Testing Console & Security Diagnostics -->
+      <div class="panel" id="live-testing-panel" style="display: none; text-align: left;">
+        <h3 class="panel-title">⚡ Live Keystroke Testing Console</h3>
+        <p class="text-muted mb-4" style="font-size: 0.8rem; line-height: 1.3;">
+          Replicate of the hardware keystroke menus. Test key injection scripts and target OS security settings immediately over USB Serial.
+        </p>
+
+        <div>
+          <label for="serialTestCategory">Payload Category</label>
+          <select id="serialTestCategory">
+            <option value="0">OS Shortcuts</option>
+            <option value="1">Presenter Mode</option>
+            <option value="3">Pen-Test Payloads</option>
+            <option value="2">Custom Payload</option>
+          </select>
+
+          <label for="serialTestAction">Action / Command</label>
+          <select id="serialTestAction">
+            <!-- Dynamically populated -->
+          </select>
+
+          <div id="serialTestCustomGroup" style="display: none;">
+            <label for="serialTestCustomInput">Live Keystroke String / Script</label>
+            <textarea id="serialTestCustomInput" rows="3" style="background-color: #1a1a24; border: 1px solid var(--border-color); color: #fff; border-radius: 5px; padding: 8px 10px; width: 100%; margin-bottom: 10px; font-size: 0.85rem; font-family: monospace; resize: vertical;" placeholder="Type text or use cmd:command"></textarea>
+          </div>
+
+          <button class="btn btn-primary w-100" id="serialTestInjectBtn" style="padding: 10px 15px; margin-top: 5px; font-weight: bold;">
+            ⚡ Inject Keystroke Immediately
+          </button>
+        </div>
+
+        <h3 class="panel-title mt-3" style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 15px;">🔊 Sound & 💡 LED Diagnostics</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label for="diagBeepFreq">Buzzer Pitch (Hz)</label>
+            <input type="number" id="diagBeepFreq" value="2000" min="100" max="10000" step="100">
+          </div>
+          <div>
+            <label for="diagBeepDuration">Duration (ms)</label>
+            <input type="number" id="diagBeepDuration" value="100" min="10" max="2000" step="50">
+          </div>
+        </div>
+        <button class="btn btn-secondary w-100 mb-4" id="diagBeepBtn">🔊 Play Beep Test</button>
+
+        <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; margin-bottom: 10px; align-items: end;">
+          <div>
+            <label for="diagLedMode">LED Effect Mode</label>
+            <select id="diagLedMode" style="margin-bottom: 0;">
+              <option value="0">Normal (Status Indicators)</option>
+              <option value="1">Static Solid Color</option>
+              <option value="2">Rainbow Cycle</option>
+              <option value="3">Breathing Glow</option>
+              <option value="4">LED OFF</option>
+            </select>
+          </div>
+          <div>
+            <label for="diagLedColor">Solid Color</label>
+            <input type="color" id="diagLedColor" value="#ff8800" style="height: 35px; width: 100%; border: 1px solid var(--border-color); background: none; cursor: pointer; border-radius: 5px; padding: 2px;">
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label for="diagLedSpeed">Effect Speed (1-255)</label>
+            <input type="number" id="diagLedSpeed" value="128" min="1" max="255">
+          </div>
+          <div>
+            <label for="diagLedApplyBtn">&nbsp;</label>
+            <button class="btn btn-secondary w-100" id="diagLedApplyBtn">💡 Apply LED State</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- RIGHT COLUMN: Web Serial Connection & Setup Form -->
@@ -343,6 +419,15 @@
                 <option value="1">Enabled (Beep Hourly)</option>
               </select>
             </div>
+            <div>
+              <label for="serialTargetOS">Target OS</label>
+              <select id="serialTargetOS">
+                <option value="0">Windows</option>
+                <option value="1">macOS</option>
+                <option value="2">Linux</option>
+                <option value="3">Android</option>
+              </select>
+            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
@@ -411,6 +496,7 @@
     const webPassword = document.getElementById('serialWebPassword');
     const timeFormatSelect = document.getElementById('serialTimeFormat');
     const hourlyChimeSelect = document.getElementById('serialHourlyChime');
+    const targetOsSelect = document.getElementById('serialTargetOS');
     const customInput = document.getElementById('serialCustomPayload');
     
     const wifiSsid = document.getElementById('serialWifiSsid');
@@ -425,6 +511,146 @@
     
     const terminal = document.getElementById('serial-terminal');
 
+    // Testing & Diagnostics Elements
+    const liveTestingPanel = document.getElementById('live-testing-panel');
+    const serialTestCategory = document.getElementById('serialTestCategory');
+    const serialTestAction = document.getElementById('serialTestAction');
+    const serialTestCustomGroup = document.getElementById('serialTestCustomGroup');
+    const serialTestCustomInput = document.getElementById('serialTestCustomInput');
+    const serialTestInjectBtn = document.getElementById('serialTestInjectBtn');
+
+    const diagBeepBtn = document.getElementById('diagBeepBtn');
+    const diagBeepFreq = document.getElementById('diagBeepFreq');
+    const diagBeepDuration = document.getElementById('diagBeepDuration');
+
+    const diagLedApplyBtn = document.getElementById('diagLedApplyBtn');
+    const diagLedMode = document.getElementById('diagLedMode');
+    const diagLedColor = document.getElementById('diagLedColor');
+    const diagLedSpeed = document.getElementById('diagLedSpeed');
+
+    // Actions map for live testing replicate dropdown
+    const actionsMap = {
+      // Category 0: OS Shortcuts
+      0: {
+        // Windows (0)
+        0: [
+          { text: "Lock Screen (Win + L)", subIdx: 0 },
+          { text: "Close App (Alt + F4)", subIdx: 1 },
+          { text: "Minimize All (Win + D)", subIdx: 2 },
+          { text: "Task Manager (Ctrl + Shift + Esc)", subIdx: 3 },
+          { text: "Empty Recycle Bin (PowerShell)", subIdx: 4 }
+        ],
+        // macOS (1)
+        1: [
+          { text: "Lock Screen (Ctrl + Cmd + Q)", subIdx: 0 },
+          { text: "Close App (Cmd + W)", subIdx: 1 },
+          { text: "Minimize All (Cmd + H)", subIdx: 2 },
+          { text: "Task Monitor (Cmd + Opt + Esc)", subIdx: 3 },
+          { text: "Empty Trash (Cmd + Shift + Delete)", subIdx: 4 }
+        ],
+        // Linux (2)
+        2: [
+          { text: "Lock Screen (Win + L)", subIdx: 0 },
+          { text: "Close App (Alt + F4)", subIdx: 1 },
+          { text: "Minimize All (Win + D)", subIdx: 2 },
+          { text: "Task Monitor (Terminal top)", subIdx: 3 },
+          { text: "Empty Trash (rm -rf ~/.local/share/Trash/*)", subIdx: 4 }
+        ],
+        // Android (3)
+        3: [
+          { text: "Lock Screen (Win + L)", subIdx: 0 },
+          { text: "Close App (Esc/Back)", subIdx: 1 },
+          { text: "Minimize All (Home)", subIdx: 2 },
+          { text: "App Switcher (Alt + Tab)", subIdx: 3 },
+          { text: "Notification Panel (Win + N)", subIdx: 4 }
+        ]
+      },
+      // Category 1: Presenter Mode (same for all OS)
+      1: {
+        all: [
+          { text: "Next Slide (Page Down)", subIdx: 0 },
+          { text: "Prev Slide (Page Up)", subIdx: 1 },
+          { text: "Black Screen (B)", subIdx: 2 },
+          { text: "White Screen (W)", subIdx: 3 }
+        ]
+      },
+      // Category 3: Pen-Test Payloads
+      3: {
+        // Windows (0)
+        0: [
+          { text: "Notepad Tabbed Demo", subIdx: 0 },
+          { text: "Add Admin Account (UAC Command)", subIdx: 1 },
+          { text: "PowerShell Background Exec", subIdx: 2 },
+          { text: "Disable Firewall Profiles", subIdx: 3 }
+        ],
+        // macOS (1)
+        1: [
+          { text: "TextEdit Demo", subIdx: 0 },
+          { text: "Add Admin Account (dscl)", subIdx: 1 },
+          { text: "Shell Background Exec (curl)", subIdx: 2 },
+          { text: "Disable pfctl Firewall", subIdx: 3 }
+        ],
+        // Linux (2)
+        2: [
+          { text: "Nano Demo", subIdx: 0 },
+          { text: "Add Sudo User (useradd)", subIdx: 1 },
+          { text: "Shell Background Exec (curl)", subIdx: 2 },
+          { text: "Disable UFW Firewall", subIdx: 3 }
+        ],
+        // Android (3)
+        3: [
+          { text: "Keep Notes Demo", subIdx: 0 },
+          { text: "Add Admin (N/A)", subIdx: 1, disabled: true },
+          { text: "Shell Exec (N/A)", subIdx: 2, disabled: true },
+          { text: "Disable Firewall (N/A)", subIdx: 3, disabled: true }
+        ]
+      },
+      // Category 2: Custom Payload (different options)
+      2: {
+        all: [
+          { text: "Run Saved Custom Payload", subIdx: 0 },
+          { text: "Type Live Text / Keystrokes...", subIdx: 1 }
+        ]
+      }
+    };
+
+    function updateTestActions() {
+      if (!serialTestCategory || !serialTestAction || !targetOsSelect) return;
+      const category = parseInt(serialTestCategory.value);
+      const os = parseInt(targetOsSelect.value) || 0;
+      
+      serialTestAction.innerHTML = '';
+      
+      let optionsList = [];
+      if (category === 0 || category === 3) {
+        optionsList = actionsMap[category][os] || [];
+      } else {
+        optionsList = actionsMap[category].all || [];
+      }
+      
+      optionsList.forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt.subIdx;
+        optionEl.textContent = opt.text;
+        if (opt.disabled) optionEl.disabled = true;
+        serialTestAction.appendChild(optionEl);
+      });
+      
+      toggleCustomLiveGroup();
+    }
+
+    function toggleCustomLiveGroup() {
+      if (!serialTestCategory || !serialTestAction || !serialTestCustomGroup) return;
+      const category = parseInt(serialTestCategory.value);
+      const actionSubIdx = parseInt(serialTestAction.value);
+      
+      if (category === 2 && actionSubIdx === 1) {
+        serialTestCustomGroup.style.display = 'block';
+      } else {
+        serialTestCustomGroup.style.display = 'none';
+      }
+    }
+
     // Timezone listener
     if (timezoneSelect) {
       timezoneSelect.addEventListener('change', () => {
@@ -435,6 +661,17 @@
           if (timezoneCustom) timezoneCustom.value = timezoneSelect.value;
         }
       });
+    }
+
+    // Live testing change listeners
+    if (targetOsSelect) {
+      targetOsSelect.addEventListener('change', updateTestActions);
+    }
+    if (serialTestCategory) {
+      serialTestCategory.addEventListener('change', updateTestActions);
+    }
+    if (serialTestAction) {
+      serialTestAction.addEventListener('change', toggleCustomLiveGroup);
     }
 
     // Check for Web Serial API availability in browser
@@ -462,7 +699,10 @@
             rebootBtn, readConfigBtn, saveConfigBtn, resetDefaultsBtn,
             bootText, btName, bleEnabled, webPassword, timeFormatSelect, hourlyChimeSelect, customInput,
             wifiSsid, wifiPassword, timezoneSelect, timezoneCustom,
-            screenType, sdaPin, sclPin
+            screenType, sdaPin, sclPin,
+            serialTestCategory, serialTestAction, serialTestCustomInput, serialTestInjectBtn,
+            diagBeepBtn, diagBeepFreq, diagBeepDuration,
+            diagLedApplyBtn, diagLedMode, diagLedColor, diagLedSpeed
         ];
         elements.forEach(el => {
             if (el) {
@@ -485,6 +725,10 @@
             const formView = document.getElementById('serial-form-view');
             if (conView) conView.style.display = 'none';
             if (formView) formView.style.display = 'block';
+            if (liveTestingPanel) liveTestingPanel.style.display = 'block';
+            
+            // Populates test dropdowns initially
+            updateTestActions();
         } else {
             document.body.classList.remove('is-connected');
             document.body.classList.add('is-disconnected');
@@ -496,6 +740,7 @@
             const formView = document.getElementById('serial-form-view');
             if (conView) conView.style.display = 'block';
             if (formView) formView.style.display = 'none';
+            if (liveTestingPanel) liveTestingPanel.style.display = 'none';
         }
     }
 
@@ -547,6 +792,10 @@
             if (params.has('web_pass') && webPassword) webPassword.value = params.get('web_pass');
             if (params.has('time_fmt') && timeFormatSelect) timeFormatSelect.value = params.get('time_fmt');
             if (params.has('chime_en') && hourlyChimeSelect) hourlyChimeSelect.value = params.get('chime_en');
+            if (params.has('target_os') && targetOsSelect) {
+                targetOsSelect.value = params.get('target_os');
+                updateTestActions();
+            }
             if (params.has('payload') && customInput) customInput.value = params.get('payload');
             if (params.has('screen') && screenType) screenType.value = params.get('screen');
             if (params.has('sda') && sdaPin) sdaPin.value = params.get('sda');
@@ -611,6 +860,8 @@
             appendLog("Device connected via USB Serial successfully.", "info");
 
             setTimeout(async () => {
+                const epochSec = Math.floor(Date.now() / 1000);
+                await writeLine(`SET_EPOCH:${epochSec}`);
                 await writeLine("GET_CONFIG");
             }, 800);
 
@@ -652,6 +903,7 @@
             
             const tz = timezoneCustom.value || "UTC0";
             await writeLine(`SET_WIFI:${wifiSsid.value},${wifiPassword.value},${tz}`);
+            if (targetOsSelect) await writeLine(`SET_OS:${targetOsSelect.value}`);
             await writeLine("SAVE_CONF");
         });
     }
@@ -677,6 +929,56 @@
     if (readConfigBtn) {
         readConfigBtn.addEventListener('click', async () => {
             await writeLine("GET_CONFIG");
+        });
+    }
+
+    // Inject button event listener
+    if (serialTestInjectBtn) {
+        serialTestInjectBtn.addEventListener('click', async () => {
+            const category = parseInt(serialTestCategory.value);
+            const actionSubIdx = parseInt(serialTestAction.value);
+            
+            if (category === 2 && actionSubIdx === 1) {
+                // Send Live Custom Payload
+                const val = serialTestCustomInput.value;
+                if (!val || val.trim().length === 0) {
+                    alert("Please type some custom live text or command to inject!");
+                    return;
+                }
+                await writeLine(`RUN_PAYLOAD:${val}`);
+            } else {
+                // Send built-in keystroke command
+                await writeLine(`RUN_KEYSTROKE:${category},${actionSubIdx}`);
+            }
+        });
+    }
+
+    // Sound test button event listener
+    if (diagBeepBtn) {
+        diagBeepBtn.addEventListener('click', async () => {
+            const freq = parseInt(diagBeepFreq.value) || 2000;
+            const dur = parseInt(diagBeepDuration.value) || 100;
+            await writeLine(`BEEP:${freq},${dur}`);
+        });
+    }
+
+    // LED test button event listener
+    if (diagLedApplyBtn) {
+        diagLedApplyBtn.addEventListener('click', async () => {
+            const mode = parseInt(diagLedMode.value);
+            await writeLine(`SET_LED_MODE:${mode}`);
+            
+            // Parse hex color to RGB
+            const hex = diagLedColor.value;
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            await writeLine(`SET_LED_COLOR:${r},${g},${b}`);
+            
+            const speed = parseInt(diagLedSpeed.value) || 128;
+            await writeLine(`SET_LED_SPEED:${speed}`);
+            
+            await writeLine("SAVE_CONF");
         });
     }
 

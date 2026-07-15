@@ -212,6 +212,7 @@
       color: #b0b0b8;
       overflow-y: auto;
       white-space: pre-wrap;
+      word-break: break-all;
     }
 
     footer {
@@ -233,7 +234,8 @@
       <span style="font-size: 1.4rem;">⌨️</span>
       <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.5px;">OLO Keystrokes Serial Companion</h2>
     </div>
-    <div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="http://olokeys.local/" target="_blank" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; text-decoration: none;">🌐 Web Controller</a>
       <span class="status-badge" id="statusBadgeHeader">
         <span class="status-dot"></span>
         <span id="statusTextHeader">Disconnected</span>
@@ -243,7 +245,7 @@
 
   <div class="dashboard-grid">
     <!-- LEFT COLUMN: Firmware Flashing & Diagnostics -->
-    <div style="display: flex; flex-direction: column; gap: 15px;">
+    <div style="display: flex; flex-direction: column; gap: 15px; min-width: 0;">
       <div class="panel text-center" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 15px;">
         <div style="font-size: 2.8rem; margin-bottom: 15px;">💾</div>
         <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem;">Firmware Flashing</h3>
@@ -334,7 +336,7 @@
     </div>
 
     <!-- RIGHT COLUMN: Web Serial Connection & Setup Form -->
-    <div style="display: flex; flex-direction: column; gap: 15px;">
+    <div style="display: flex; flex-direction: column; gap: 15px; min-width: 0;">
       <div class="panel" id="serial-settings-panel" style="min-height: 380px;">
         
         <!-- Disconnected State -->
@@ -377,6 +379,9 @@
               
               <label for="serialBtName">BLE Advertising Name</label>
               <input type="text" id="serialBtName" placeholder="OLO-Keystrokes">
+              
+              <label for="serialBtMfg">BLE Manufacturer Name</label>
+              <input type="text" id="serialBtMfg" placeholder="Micromaker Labs">
               
               <label for="serialBleEnabled">Bluetooth State</label>
               <select id="serialBleEnabled">
@@ -492,6 +497,7 @@
 
     const bootText = document.getElementById('serialBootText');
     const btName = document.getElementById('serialBtName');
+    const btMfg = document.getElementById('serialBtMfg');
     const bleEnabled = document.getElementById('serialBleEnabled');
     const webPassword = document.getElementById('serialWebPassword');
     const timeFormatSelect = document.getElementById('serialTimeFormat');
@@ -629,10 +635,10 @@
       }
       
       optionsList.forEach(opt => {
+        if (opt.disabled) return; // Hide completely
         const optionEl = document.createElement('option');
         optionEl.value = opt.subIdx;
         optionEl.textContent = opt.text;
-        if (opt.disabled) optionEl.disabled = true;
         serialTestAction.appendChild(optionEl);
       });
       
@@ -697,7 +703,7 @@
     function setControlsState(enabled) {
         const elements = [
             rebootBtn, readConfigBtn, saveConfigBtn, resetDefaultsBtn,
-            bootText, btName, bleEnabled, webPassword, timeFormatSelect, hourlyChimeSelect, customInput,
+            bootText, btName, btMfg, bleEnabled, webPassword, timeFormatSelect, hourlyChimeSelect, customInput,
             wifiSsid, wifiPassword, timezoneSelect, timezoneCustom,
             screenType, sdaPin, sclPin,
             serialTestCategory, serialTestAction, serialTestCustomInput, serialTestInjectBtn,
@@ -786,6 +792,7 @@
             
             if (params.has('boot_txt') && bootText) bootText.value = params.get('boot_txt');
             if (params.has('bt_name') && btName) btName.value = params.get('bt_name');
+            if (params.has('bt_mfg') && btMfg) btMfg.value = params.get('bt_mfg');
             if (params.has('ble_en') && bleEnabled) bleEnabled.value = params.get('ble_en');
             if (params.has('wifi_ssid') && wifiSsid) wifiSsid.value = params.get('wifi_ssid');
             if (params.has('wifi_pass') && wifiPassword) wifiPassword.value = params.get('wifi_pass');
@@ -893,6 +900,7 @@
         saveConfigBtn.addEventListener('click', async () => {
             await writeLine(`SET_BOOT_TXT:${bootText.value}`);
             await writeLine(`SET_BT_NAME:${btName.value}`);
+            await writeLine(`SET_BT_MFG:${btMfg.value}`);
             await writeLine(`SET_BLE:${bleEnabled.value}`);
             await writeLine(`SET_WEB_PASS:${webPassword.value}`);
             await writeLine(`SET_TIME_FMT:${timeFormatSelect.value}`);
